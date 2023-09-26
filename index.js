@@ -3,14 +3,15 @@ const fs = require('fs');
 const colorChoices = [
     { name: "Red", value: "#FF0000" },
     { name: "Blue", value: "#0000FF" },
+    { name: "Baby Blue", value: "#89CFF0" },
     { name: "Green", value: "#008000" },
     { name: "Yellow", value: "#FFFF00" },
     { name: "Black", value: "#000000" },
     { name: "White", value: "#FFFFFF" },
     { name: "Grey", value: "#808080" },
-    { name: "Baby Blue", value: "#89CFF0" },
     { name: "Pink", value: "#FFC0CB" }
 ];
+const fontChoices = ['Arial', 'Georgia', 'Courier New'];
 
 // Questions for the user
 const questions = [
@@ -42,54 +43,74 @@ const questions = [
         name: 'textColor',
         message: 'Choose a color for the text:',
         choices: colorChoices
+    },
+    {
+        type: 'list',
+        name: 'fontFirst',
+        message: 'Choose a font for the first character:',
+        choices: fontChoices
+    },
+    {
+        type: 'list',
+        name: 'fontMiddle',
+        message: 'Choose a font for the second character:',
+        when: (answers) => answers.text.length > 1,
+        choices: fontChoices
+    },
+    {
+        type: 'list',
+        name: 'fontLast',
+        message: 'Choose a font for the third character:',
+        when: (answers) => answers.text.length === 3,
+        choices: fontChoices
     }
 ];
 
 
 // SVG generation based on user's choice
 function generateSvg(answers) {
-    let svgContent = '';
     const header = '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">';
-    const footer = '</svg>';
-    
-    switch(answers.shape) {
+    let shapeContent = '';
+    const borderColor = answers.textColor;
+    const borderWidth = 5;
+    let textY = 100;
+
+    switch (answers.shape) {
         case 'Circle':
-            svgContent = `<circle cx="100" cy="100" r="80" fill="${answers.color}" />`;
-            break;
-        case 'Rectangle':
-            svgContent = `<rect width="180" height="100" x="10" y="50" fill="${answers.color}" />`;
-            break;
-        case 'Triangle':
-            svgContent = `<polygon points="100,10 190,190 10,190" fill="${answers.color}" />`;
-            break;
-        case 'Hexagon':
-            svgContent = `<polygon points="100,10 190,60 190,140 100,190 10,140 10,60" fill="${answers.color}" />`;
+            shapeContent = `<circle cx="100" cy="100" r="95" fill="${answers.color}" stroke="${borderColor}" stroke-width="${borderWidth}" />`;
             break;
         case 'Square':
-            svgContent = `<rect width="160" height="160" x="20" y="20" fill="${answers.color}" />`;
+            shapeContent = `<rect x="5" y="5" width="190" height="190" fill="${answers.color}" stroke="${borderColor}" stroke-width="${borderWidth}" />`;
+            break;
+        case 'Rectangle':
+            shapeContent = `<rect x="5" y="5" width="190" height="95" fill="${answers.color}" stroke="${borderColor}" stroke-width="${borderWidth}" />`;
+            textY -= 40;  // Move text up for rectangle
+            break;
+        case 'Triangle':
+            shapeContent = `<polygon points="100,5 5,195 195,195" fill="${answers.color}" stroke="${borderColor}" stroke-width="${borderWidth}" />`;
+            textY += 60;  // Move text down for triangle
+            break;
+        case 'Hexagon':
+            shapeContent = `<polygon points="100,5 195,50 195,150 100,195 5,150 5,50" fill="${answers.color}" stroke="${borderColor}" stroke-width="${borderWidth}" />`;
             break;
     }
 
     let textContent = '';
-if (answers.text.length === 1) {
-    textContent = `<text x="100" y="100" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="35" fill="${answers.textColor}">${answers.text}</text>`;
-} else if (answers.text.length === 2) {
-    textContent = `
-        <text x="85" y="100" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="25" fill="${answers.textColor}">${answers.text[0]}</text>
-        <text x="115" y="100" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="25" fill="${answers.textColor}">${answers.text[1]}</text>
-    `;
-} else if (answers.text.length === 3) {
-    textContent = `
-        <text x="80" y="100" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="25" fill="${answers.textColor}">${answers.text[0]}</text>
-        <text x="100" y="100" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="35" fill="${answers.textColor}">${answers.text[1]}</text>
-        <text x="120" y="100" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="25" fill="${answers.textColor}">${answers.text[2]}</text>
-    `;
+    if (answers.text.length === 1) {
+        textContent = `<text x="100" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontFirst}" font-size="60" font-weight="bold" fill="${answers.textColor}">${answers.text}</text>`;
+    } else if (answers.text.length === 2) {
+        textContent = `<text x="85" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontFirst}" font-size="50" font-weight="bold" fill="${answers.textColor}">${answers.text[0]}</text>
+                       <text x="115" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontMiddle}" font-size="50" font-weight="bold" fill="${answers.textColor}">${answers.text[1]}</text>`;
+    } else if (answers.text.length === 3) {
+        textContent = `<text x="60" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontFirst}" font-size="50" font-weight="bold" fill="${answers.textColor}">${answers.text[0]}</text>
+                       <text x="100" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontMiddle}" font-size="60" font-weight="bold" fill="${answers.textColor}">${answers.text[1]}</text>
+                       <text x="140" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontLast}" font-size="50" font-weight="bold" fill="${answers.textColor}">${answers.text[2]}</text>`;
+    }
+
+    const footer = '</svg>';
+    return `${header}${shapeContent}${textContent}${footer}`;
 }
 
-    
-    return `${header}${svgContent}${textContent}${footer}`;
-}
- 
 inquirer.prompt(questions).then(answers => {
     const svgContent = generateSvg(answers);
     fs.writeFileSync('logo.svg', svgContent, 'utf-8');

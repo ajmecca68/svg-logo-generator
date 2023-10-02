@@ -100,11 +100,11 @@ function generateSvg(answers) {
         textContent = `<text x="100" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontFirst}" font-size="60" font-weight="bold" fill="${answers.textColor}">${answers.text}</text>`;
     } else if (answers.text.length === 2) {
         textContent = `<text x="85" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontFirst}" font-size="50" font-weight="bold" fill="${answers.textColor}">${answers.text[0]}</text>
-                       <text x="115" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontMiddle}" font-size="50" font-weight="bold" fill="${answers.textColor}">${answers.text[1]}</text>`;
+        <text x="115" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontMiddle}" font-size="50" font-weight="bold" fill="${answers.textColor}">${answers.text[1]}</text>`;
     } else if (answers.text.length === 3) {
         textContent = `<text x="60" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontFirst}" font-size="50" font-weight="bold" fill="${answers.textColor}">${answers.text[0]}</text>
-                       <text x="100" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontMiddle}" font-size="60" font-weight="bold" fill="${answers.textColor}">${answers.text[1]}</text>
-                       <text x="140" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontLast}" font-size="50" font-weight="bold" fill="${answers.textColor}">${answers.text[2]}</text>`;
+        <text x="100" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontMiddle}" font-size="60" font-weight="bold" fill="${answers.textColor}">${answers.text[1]}</text>
+        <text x="140" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontLast}" font-size="50" font-weight="bold" fill="${answers.textColor}">${answers.text[2]}</text>`;
     }
 
     const footer = '</svg>';

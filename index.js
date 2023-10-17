@@ -1,16 +1,99 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
+
+class Color {
+  constructor(name, value) {
+    this.name = name;
+    this.value = value;
+  }
+}
+
+class Shape {
+  constructor(name, color, borderColor, borderWidth) {
+    this.name = name;
+    this.color = color;
+    this.borderColor = borderColor;
+    this.borderWidth = borderWidth;
+  }
+
+  generateSvg() {
+    throw new Error('generateSvg() method must be implemented by subclasses');
+  }
+}
+
+class Circle extends Shape {
+  generateSvg() {
+    return `<circle cx="100" cy="100" r="95" fill="${this.color}" stroke="${this.borderColor}" stroke-width="${this.borderWidth}" />`;
+  }
+}
+
+class Square extends Shape {
+    generateSvg() {
+      return `<rect x="5" y="5" width="190" height="190" fill="${this.color}" stroke="${this.borderColor}" stroke-width="${this.borderWidth}" />`;
+    }
+  }
+
+  class Rectangle extends Shape {
+    generateSvg() {
+      return `<rect x="5" y="5" width="190" height="95" fill="${this.color}" stroke="${this.borderColor}" stroke-width="${this.borderWidth}" />`;
+    }
+  }
+  
+  class Triangle extends Shape {
+    generateSvg() {
+      return `<polygon points="100,5 5,195 195,195" fill="${this.color}" stroke="${this.borderColor}" stroke-width="${this.borderWidth}" />`;
+    }
+  }
+  
+
+// Define other shape classes (Rectangle, Triangle, Hexagon) similarly.
+
+class Text {
+  constructor(text, x, y, font, fontSize, textColor) {
+    this.text = text;
+    this.x = x;
+    this.y = y;
+    this.font = font;
+    this.fontSize = fontSize;
+    this.textColor = textColor;
+  }
+
+  generateSvg() {
+    return `<text x="${this.x}" y="${this.y}" dominant-baseline="middle" text-anchor="middle" font-family="${this.font}" font-size="${this.fontSize}" font-weight="bold" fill="${this.textColor}">${this.text}</text>`;
+  }
+}
+
+class SVG {
+  constructor(width, height) {
+    this.width = width;
+    this.height = height;
+    this.elements = [];
+  }
+
+  addElement(element) {
+    this.elements.push(element);
+  }
+
+  generate() {
+    const header = `<svg width="${this.width}" height="${this.height}" xmlns="http://www.w3.org/2000/svg">`;
+    const footer = '</svg>';
+    const content = this.elements.map(element => element.generateSvg()).join('');
+    return `${header}${content}${footer}`;
+  }
+}
+
 const colorChoices = [
-    { name: "Red", value: "#FF0000" },
-    { name: "Blue", value: "#0000FF" },
-    { name: "Baby Blue", value: "#89CFF0" },
-    { name: "Green", value: "#008000" },
-    { name: "Yellow", value: "#FFFF00" },
-    { name: "Black", value: "#000000" },
-    { name: "White", value: "#FFFFFF" },
-    { name: "Grey", value: "#808080" },
-    { name: "Pink", value: "#FFC0CB" }
+  new Color("Red", "#FF0000"),
+  new Color("Blue", "#0000FF"),
+  new Color("Baby Blue", "#89CFF0"),
+  new Color("Green", "#008000"),
+  new Color("Yellow", "#FFFF00"),
+  new Color("Black", "#000000"),
+  new Color("White", "#FFFFFF"),
+  new Color("Grey", "#808080"),
+  new Color("Pink", "#FFC0CB")
 ];
+
 const fontChoices = ['Arial', 'Georgia', 'Courier New'];
 
 // Questions for the user
@@ -19,7 +102,7 @@ const questions = [
         type: 'list',
         name: 'shape',
         message: 'Select a shape for the logo:',
-        choices: ['Circle', 'Rectangle', 'Triangle', 'Hexagon', 'Square']
+        choices: ['Circle', 'Rectangle', 'Triangle', 'Square']
     },
     {
         type: 'input',
@@ -66,53 +149,40 @@ const questions = [
     }
 ];
 
-
-// SVG generation based on user's choice
-function generateSvg(answers) {
-    const header = '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">';
-    let shapeContent = '';
-    const borderColor = answers.textColor;
-    const borderWidth = 5;
-    let textY = 100;
-
-    switch (answers.shape) {
-        case 'Circle':
-            shapeContent = `<circle cx="100" cy="100" r="95" fill="${answers.color}" stroke="${borderColor}" stroke-width="${borderWidth}" />`;
-            break;
-        case 'Square':
-            shapeContent = `<rect x="5" y="5" width="190" height="190" fill="${answers.color}" stroke="${borderColor}" stroke-width="${borderWidth}" />`;
-            break;
-        case 'Rectangle':
-            shapeContent = `<rect x="5" y="5" width="190" height="95" fill="${answers.color}" stroke="${borderColor}" stroke-width="${borderWidth}" />`;
-            textY -= 40;  // Move text up for rectangle
-            break;
-        case 'Triangle':
-            shapeContent = `<polygon points="100,5 5,195 195,195" fill="${answers.color}" stroke="${borderColor}" stroke-width="${borderWidth}" />`;
-            textY += 60;  // Move text down for triangle
-            break;
-        case 'Hexagon':
-            shapeContent = `<polygon points="100,5 195,50 195,150 100,195 5,150 5,50" fill="${answers.color}" stroke="${borderColor}" stroke-width="${borderWidth}" />`;
-            break;
-    }
-
-    let textContent = '';
-    if (answers.text.length === 1) {
-        textContent = `<text x="100" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontFirst}" font-size="60" font-weight="bold" fill="${answers.textColor}">${answers.text}</text>`;
-    } else if (answers.text.length === 2) {
-        textContent = `<text x="85" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontFirst}" font-size="50" font-weight="bold" fill="${answers.textColor}">${answers.text[0]}</text>
-        <text x="115" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontMiddle}" font-size="50" font-weight="bold" fill="${answers.textColor}">${answers.text[1]}</text>`;
-    } else if (answers.text.length === 3) {
-        textContent = `<text x="60" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontFirst}" font-size="50" font-weight="bold" fill="${answers.textColor}">${answers.text[0]}</text>
-        <text x="100" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontMiddle}" font-size="60" font-weight="bold" fill="${answers.textColor}">${answers.text[1]}</text>
-        <text x="140" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${answers.fontLast}" font-size="50" font-weight="bold" fill="${answers.textColor}">${answers.text[2]}</text>`;
-    }
-
-    const footer = '</svg>';
-    return `${header}${shapeContent}${textContent}${footer}`;
-}
-
 inquirer.prompt(questions).then(answers => {
-    const svgContent = generateSvg(answers);
-    fs.writeFileSync('logo.svg', svgContent, 'utf-8');
-    console.log('logo.svg has been generated!');
+  const svg = new SVG(200, 200);
+  const shape = getSelectedShape(answers);
+  const text = new Text(
+    answers.text,
+    100, // x-coordinate for text (centered)
+    100, // y-coordinate for text (centered)
+    answers.fontFirst,
+    60, // Font size for the text
+    answers.textColor
+  );
+  svg.addElement(shape);
+  svg.addElement(text);
+  const svgContent = svg.generate();
+  fs.writeFileSync('logo.svg', svgContent, 'utf-8');
+  console.log('logo.svg has been generated!');
 });
+
+function getSelectedShape(answers) {
+  const { shape, color, textColor } = answers;
+  const borderColor = textColor;
+  const borderWidth = 5;
+
+  switch (shape) {
+    case 'Circle':
+      return new Circle(shape, color, borderColor, borderWidth);
+    case 'Square':
+      return new Square(shape, color, borderColor, borderWidth);
+      case 'Rectangle':
+        return new Rectangle(shape, color, borderColor, borderWidth);
+      case 'Triangle':
+        return new Triangle(shape, color, borderColor, borderWidth);
+      // Add cases for other shape types as needed
+    default:
+      throw new Error('Invalid shape selected');
+  }
+}

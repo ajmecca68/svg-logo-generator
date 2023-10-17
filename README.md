@@ -34,5 +34,4 @@ GITHUB: https://github.com/ajmecca68
 EMAIL: [amecca1968@gmail.com](mailto:amecca1968@gmail.com)
 
 ## Tests
-Run a test? Just type "node test.js" in the command line.
-it will generate a TEST_README.md file.
+Run a test? Just type npm test
